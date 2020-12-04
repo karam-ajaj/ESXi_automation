@@ -1,0 +1,10 @@
+n=$(wc -l ./esxi-hosts | awk '{ print $1 }')
+for i in $(eval echo "{1..$n}")
+do
+line=$(echo "$1" | sed ''$i'q;d' ./esxi-hosts)
+pw=$(echo "$1" | sed ''$i'q;d' ./passwords)
+echo "Checking the $i host: ($line) ***"
+echo "The name of the $i host is: ($line)" >> ./esxi-hosts.log
+sshpass -p "$pw" ssh -o "StrictHostKeyChecking no" root@"$line" "/etc/init.d/vShield-Stateful-Firewall status && ps | grep vsfwd && esxcli network ip connection list | grep 5671 && esxcfg-advcfg -g /UserVars/RmqIpAddress" >> ./esxi-hosts.log
+echo "*******" >> ./esxi-hosts.log
+done
